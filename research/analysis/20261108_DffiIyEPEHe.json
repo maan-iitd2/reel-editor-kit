@@ -1,0 +1,26 @@
+{
+ "file": "20261108_DffiIyEPEHe.mp4",
+ "duration_s": 66.9,
+ "words": 304,
+ "wpm": 272.6,
+ "speech_ratio": 0.93,
+ "first_word_s": 0.02,
+ "visual_changes": 12,
+ "changes_per_10s": 1.79,
+ "avg_shot_s": 5.15,
+ "hook_3s": "I'm selling this and I'm going to show you how to set the whole thing up for",
+ "changes": [
+  3.6,
+  4.0,
+  4.267,
+  4.733,
+  5.0,
+  18.667,
+  20.4,
+  22.367,
+  51.567,
+  53.0,
+  58.233,
+  64.467
+ ]
+}

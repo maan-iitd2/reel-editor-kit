@@ -1,0 +1,27 @@
+# media is never committed: footage, renders, downloaded reels, audio
+*.mp4
+*.mov
+*.mp3
+*.wav
+*.m4a
+*.pack
+*.jpg
+*.jpeg
+*.webp
+*.png
+!skills/**/*.png
+__pycache__/
+*.log
+out/
+frames/
+
+# downloaded reels and stills of someone else's work
+references/videos/
+references/paper/
+research/frames/
+research/paper/
+lab/reel-*/
+
+# personal video folders; only the template is shared
+videos/*
+!videos/_template/

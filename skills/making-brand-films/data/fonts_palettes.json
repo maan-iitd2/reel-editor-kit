@@ -1,0 +1,116 @@
+{
+  "_about": "Curated fallbacks for brand_kit.py: vetted free fonts (Google Fonts / Fontshare), pairings and palette archetypes per brand feeling (calm / playful / hype, same keys as the 'brand feeling' table in SKILL.md). Every font name here must load: `python brand_kit.py --verify-data` probes them all. Palette roles: ink = text, background = page, accent = brand colour, accent2 = second hue, soft = tint panel, deep = dark shade of accent, muted = captions/rules.",
+  "fonts": {
+    "Newsreader":            {"source": "google",    "category": "serif",   "feelings": ["calm"]},
+    "Cormorant Garamond":    {"source": "google",    "category": "serif",   "feelings": ["calm"]},
+    "Instrument Serif":      {"source": "google",    "category": "serif",   "feelings": ["calm", "playful"]},
+    "Fraunces":              {"source": "google",    "category": "serif",   "feelings": ["calm", "playful"]},
+    "Playfair Display":      {"source": "google",    "category": "serif",   "feelings": ["calm"]},
+    "EB Garamond":           {"source": "google",    "category": "serif",   "feelings": ["calm"]},
+    "Libre Baskerville":     {"source": "google",    "category": "serif",   "feelings": ["calm"]},
+    "Erode":                 {"source": "fontshare", "category": "serif",   "feelings": ["calm"]},
+    "Montserrat":            {"source": "google",    "category": "sans",    "feelings": ["calm", "playful"]},
+    "Jost":                  {"source": "google",    "category": "sans",    "feelings": ["calm"]},
+    "Inter":                 {"source": "google",    "category": "sans",    "feelings": ["calm", "hype"]},
+    "DM Sans":               {"source": "google",    "category": "sans",    "feelings": ["calm", "playful"]},
+    "Barlow":                {"source": "google",    "category": "sans",    "feelings": ["calm", "hype"]},
+    "Nunito":                {"source": "google",    "category": "rounded", "feelings": ["playful"]},
+    "Nunito Sans":           {"source": "google",    "category": "sans",    "feelings": ["calm", "playful"]},
+    "Figtree":               {"source": "google",    "category": "sans",    "feelings": ["calm", "playful"]},
+    "Outfit":                {"source": "google",    "category": "sans",    "feelings": ["playful"]},
+    "Plus Jakarta Sans":     {"source": "google",    "category": "sans",    "feelings": ["playful", "calm"]},
+    "Space Grotesk":         {"source": "google",    "category": "sans",    "feelings": ["hype", "playful"]},
+    "Satoshi":               {"source": "fontshare", "category": "sans",    "feelings": ["calm", "playful", "hype"]},
+    "General Sans":          {"source": "fontshare", "category": "sans",    "feelings": ["hype", "calm"]},
+    "Fredoka":               {"source": "google",    "category": "rounded", "feelings": ["playful"]},
+    "Bricolage Grotesque":   {"source": "google",    "category": "display", "feelings": ["playful"]},
+    "Cabinet Grotesk":       {"source": "fontshare", "category": "display", "feelings": ["playful"]},
+    "Bebas Neue":            {"source": "google",    "category": "display", "feelings": ["hype"]},
+    "Anton":                 {"source": "google",    "category": "display", "feelings": ["hype"]},
+    "Unbounded":             {"source": "google",    "category": "display", "feelings": ["hype", "playful"]},
+    "Clash Display":         {"source": "fontshare", "category": "display", "feelings": ["hype"]},
+    "JetBrains Mono":        {"source": "google",    "category": "mono",    "feelings": ["hype", "calm"]},
+    "Caveat":                {"source": "google",    "category": "script",  "feelings": ["playful"]}
+  },
+  "pairings": {
+    "calm": [
+      {"name": "editorial serif + geometric sans", "headline": "Newsreader",         "body": "Montserrat", "ui": "Barlow"},
+      {"name": "high-contrast serif + light sans", "headline": "Cormorant Garamond", "body": "Jost",       "ui": "Jost"},
+      {"name": "soft serif + soft sans (Fontshare)", "headline": "Erode",            "body": "Satoshi",    "ui": "Satoshi"}
+    ],
+    "playful": [
+      {"name": "rounded + friendly sans",          "headline": "Fredoka",             "body": "Nunito",    "ui": "Nunito"},
+      {"name": "quirky grotesk + clean sans",      "headline": "Bricolage Grotesque", "body": "DM Sans",   "ui": "DM Sans"},
+      {"name": "chunky grotesk (Fontshare)",       "headline": "Cabinet Grotesk",     "body": "Satoshi",   "ui": "Satoshi"}
+    ],
+    "hype": [
+      {"name": "condensed poster + neutral sans",  "headline": "Bebas Neue",    "body": "Inter",         "ui": "Barlow"},
+      {"name": "heavy condensed + grotesk",        "headline": "Anton",         "body": "Space Grotesk", "ui": "Space Grotesk"},
+      {"name": "sharp display (Fontshare)",        "headline": "Clash Display", "body": "General Sans",  "ui": "General Sans"}
+    ]
+  },
+  "paid_standins": {
+    "le monde journal": "Newsreader",
+    "le monde livre": "Newsreader",
+    "canela": "Fraunces",
+    "tiempos": "Newsreader",
+    "tiempos headline": "Newsreader",
+    "freight text": "Newsreader",
+    "didot": "Playfair Display",
+    "bodoni": "Playfair Display",
+    "garamond": "EB Garamond",
+    "baskerville": "Libre Baskerville",
+    "helvetica": "Inter",
+    "helvetica neue": "Inter",
+    "neue haas grotesk": "Inter",
+    "neue montreal": "Inter",
+    "sohne": "Inter",
+    "söhne": "Inter",
+    "gotham": "Montserrat",
+    "proxima nova": "Figtree",
+    "futura": "Jost",
+    "avenir": "Nunito Sans",
+    "avenir next": "Nunito Sans",
+    "circular": "DM Sans",
+    "gt walsheim": "DM Sans",
+    "gilroy": "Outfit",
+    "sofia pro": "Nunito",
+    "brandon grotesque": "Jost",
+    "druk": "Anton",
+    "knockout": "Bebas Neue"
+  },
+  "palettes": {
+    "calm": [
+      {"name": "mist", "ink": "#1f2a37", "background": "#f6f4ef", "accent": "#5f8f8b", "accent2": "#c9a98c", "soft": "#e5ede9", "deep": "#2f4f4f", "muted": "#8a9099"},
+      {"name": "sky",  "ink": "#1d3557", "background": "#f1f7fb", "accent": "#457b9d", "accent2": "#a8dadc", "soft": "#dcecf5", "deep": "#0f2a43", "muted": "#6f8296"}
+    ],
+    "playful": [
+      {"name": "candy", "ink": "#2b1b3d", "background": "#fff7ef", "accent": "#ff5c8a", "accent2": "#ffc233", "soft": "#ffe1ea", "deep": "#a31545", "muted": "#7d7289"},
+      {"name": "pop",   "ink": "#14213d", "background": "#fffdf5", "accent": "#3a86ff", "accent2": "#ffbe0b", "soft": "#dbe9ff", "deep": "#1b4fb3", "muted": "#68738a"}
+    ],
+    "hype": [
+      {"name": "night", "ink": "#f4f4f0", "background": "#0a0a0a", "accent": "#d7ff1e", "accent2": "#ff3b30", "soft": "#1a1a1a", "deep": "#8fb300", "muted": "#8a8a8a"},
+      {"name": "heat",  "ink": "#ffffff", "background": "#111111", "accent": "#ff4d00", "accent2": "#ffd400", "soft": "#2a1a14", "deep": "#b83700", "muted": "#9a9a9a"}
+    ]
+  },
+  "feelings": {
+    "calm": {
+      "keywords": ["calm", "gentle", "soothe", "soothing", "barrier", "sensitive", "clinical", "dermatolog", "science", "research", "wellness", "balance", "nourish", "natural", "organic", "pure", "clean", "ritual", "care", "hydrat", "repair", "premium", "minimal", "luxury", "sleep", "skin"],
+      "layout": ["Text sits top-left or top-centre on a calm, soft background, product in the lower two thirds.", "Generous empty space, one idea per frame.", "Soft daylight, low contrast. No neon, no hard black."],
+      "motion": ["Headline: masked rise per word, one soft spring (damping >= 0.72).", "Kicker: fade + 8 px rise, 60 ms letter-spacing settle.", "Transitions: soft dissolve or blur dissolve, cut on bars (2-4 s). Nothing bouncy."],
+      "sound": "Piano / ambient 60-95 BPM; close-up ASMR (mist, cap click, drop, swipe). No hard hits."
+    },
+    "playful": {
+      "keywords": ["fun", "play", "playful", "vibe", "gen z", "obsessed", "cute", "glow", "sparkle", "treat", "snack", "mood", "bestie", "iconic", "love", "yum", "pop", "wow", "lol", "squad"],
+      "layout": ["Big friendly type, cropped and tilted stickers, product bouncing in at an angle.", "Bright flat colour blocks, one product colour world per frame.", "Real photography with hand-made props."],
+      "motion": ["Headline: per-word pop with overshoot (spring 180/14), italic or colour-swapped word lands last.", "Stickers and emoji-style shapes wobble in on the beat.", "Transitions: wipes and swipes, cut on beats."],
+      "sound": "Lo-fi / pop 90-115 BPM; pops, bubbles, ticks. Cut on beats."
+    },
+    "hype": {
+      "keywords": ["performance", "sport", "athlete", "train", "power", "strong", "drop", "limited", "beast", "fuel", "gym", "run", "unleash", "bold", "street", "streetwear", "energy", "fast", "speed", "no excuses", "lift"],
+      "layout": ["Huge condensed type, tight leading, edge-to-edge.", "High contrast, dark ground with one loud accent colour.", "Product centred and oversized, hard crops."],
+      "motion": ["Headline: slam in on the drop (spring 220/16), scale 1.2 -> 1 with a 2-frame flash.", "Camera shake and speed ramps on impacts.", "Transitions: hard cuts, whip pans. Product slams on the drop."],
+      "sound": "Trap / house 120-140 BPM with a drop; whooshes, impacts. Cut on the drop."
+    }
+  }
+}

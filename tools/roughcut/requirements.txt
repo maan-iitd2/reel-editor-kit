@@ -1,0 +1,10 @@
+faster-whisper
+ctranslate2
+numpy
+librosa
+Pillow
+onnxruntime
+huggingface_hub
+tokenizers
+httpx
+anthropic

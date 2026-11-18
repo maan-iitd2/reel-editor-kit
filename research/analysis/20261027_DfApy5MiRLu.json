@@ -1,0 +1,21 @@
+{
+ "file": "20261027_DfApy5MiRLu.mp4",
+ "duration_s": 58.2,
+ "words": 248,
+ "wpm": 255.9,
+ "speech_ratio": 0.93,
+ "first_word_s": 0.02,
+ "visual_changes": 7,
+ "changes_per_10s": 1.2,
+ "avg_shot_s": 7.27,
+ "hook_3s": "Claude edited this video, this video, this video, and this video,",
+ "changes": [
+  7.267,
+  15.0,
+  25.1,
+  27.333,
+  31.767,
+  47.833,
+  48.9
+ ]
+}

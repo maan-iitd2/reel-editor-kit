@@ -1,0 +1,221 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>inbalance</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300;1,6..72,400&display=block" rel="stylesheet">
+<style>
+  :root{--ink:#52339f;--mid:#9173e6;--lav:#f7f4fc;--prod:#ece6f8}
+  html,body{margin:0;background:#111}
+  #stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--lav)}
+  .shot{position:absolute;inset:0;overflow:hidden;visibility:hidden}
+  .abs{position:absolute}
+  .fill{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .bg{position:absolute;inset:0;background-size:cover;background-position:50% 50%}
+  .tint{position:absolute;inset:0;background:var(--mid);mix-blend-mode:color;opacity:.28}
+  .milk{position:absolute;inset:0;background:var(--lav);opacity:.12}
+  .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(40,20,90,0) 48%,rgba(40,20,90,.42) 100%)}
+  .serif{font-family:Newsreader;font-weight:300;letter-spacing:-.02em;line-height:1}
+  .it{font-style:italic}
+  .line{display:block;overflow:hidden;padding:0 .06em .16em;margin-bottom:-.16em}
+  .w{display:inline-block;margin-right:.2em;transform-origin:0 80%}
+  .kick{font:600 32px/1 Montserrat;letter-spacing:.16em;text-transform:uppercase}
+  .on-photo{color:var(--lav);text-shadow:0 4px 34px rgba(40,20,90,.35)}
+  .prodimg{position:absolute;inset:-3%;background-size:auto 2000px;background-position:100% 100%;-webkit-mask-image:linear-gradient(90deg,transparent 0,transparent 20%,#000 36%)}
+  .chip{left:70px;width:400px;padding:24px 28px;border-radius:28px;background:rgba(255,255,255,.72);box-shadow:0 18px 40px rgba(82,51,159,.12)}
+  .chip b{display:block;font:500 42px/1.05 Newsreader;color:var(--ink)}
+  .chip span{display:block;margin-top:8px;font:500 26px/1 Montserrat;letter-spacing:.1em;text-transform:uppercase;color:var(--mid)}
+  #veil{position:absolute;inset:0;background:var(--lav);z-index:200;opacity:0;pointer-events:none}
+  #drop{position:absolute;border-radius:50%;background:var(--ink);z-index:65}  /* shots are z 10..70: above s5, below s6 type */
+  #hud{position:fixed;left:8px;bottom:8px;color:#aaa;font:12px monospace}
+</style></head>
+<body>
+<div id="stage">
+  <!-- S0 hook: lavender macro -->
+  <div class="shot" id="s0"><img class="fill" id="v0"><div class="tint"></div><div class="milk"></div><div class="shade"></div>
+    <div class="abs kick on-photo" id="k0" style="left:86px;top:1170px">be honest</div>
+    <div class="abs serif on-photo" id="t0" style="left:80px;top:1225px;font-size:170px">
+      <span class="line"><span class="w">skin feeling</span></span>
+      <span class="line"><span class="w it">off-balance?</span></span>
+    </div>
+  </div>
+  <!-- S1 spray footage -->
+  <div class="shot" id="s1"><img class="fill" id="v1"><div class="tint"></div><div class="milk"></div><div class="shade"></div>
+    <div class="abs serif on-photo" id="t1" style="left:80px;top:1360px;font-size:170px">
+      <span class="line"><span class="w">one milky</span></span>
+      <span class="line"><span class="w it">mist,</span></span>
+    </div>
+  </div>
+  <!-- S2 d'you lifestyle: model misting -->
+  <div class="shot" id="s2"><div class="bg" id="b2" style="background-image:url(assets/product/p2.jpg);background-position:62% 50%"></div><div class="tint"></div><div class="milk"></div><div class="shade"></div>
+    <div class="abs serif on-photo" id="t2" style="left:80px;top:1360px;font-size:170px">
+      <span class="line"><span class="w">and you’re</span></span>
+      <span class="line"><span class="w it">back.</span></span>
+    </div>
+  </div>
+  <!-- S3 product hero -->
+  <div class="shot" id="s3" style="background:var(--prod)"><div class="prodimg" id="b3" style="background-image:url(assets/product/p1.jpg)"></div>
+    <div class="abs kick" id="k3" style="left:86px;top:200px;color:var(--mid)">soothing milky toner</div>
+    <div class="abs serif it" id="t3" style="left:76px;top:245px;font-size:200px;color:var(--ink)">
+      <span class="line"><span class="w">inbalance.</span></span>
+    </div>
+  </div>
+  <!-- S4 ingredients -->
+  <div class="shot" id="s4" style="background:var(--prod)"><div class="prodimg" id="b4" style="background-image:url(assets/product/p1.jpg);background-size:auto 2300px;background-position:49% 62%;-webkit-mask-image:linear-gradient(90deg,transparent 0,transparent 44%,#000 49%)"></div>
+    <div class="abs kick" id="k4" style="left:86px;top:250px;color:var(--mid)">what’s in the mist</div>
+    <div class="abs chip" id="c0" style="top:330px"><b>20% hinoki water</b><span>hydrates + repairs</span></div>
+    <div class="abs chip" id="c1" style="top:520px"><b>2% honokiol complex</b><span>calms inflammation</span></div>
+    <div class="abs chip" id="c2" style="top:710px"><b>2% panthenol</b><span>eases redness</span></div>
+    <div class="abs serif" id="stat" style="left:72px;top:1300px;font-size:190px;color:var(--ink)">
+      <span class="line"><span class="w">50%</span></span>
+      <span class="line" style="font-size:.4em"><span class="w it">more hydrated</span></span>
+      <span class="line" style="font-size:.4em"><span class="w it">skin*</span></span>
+    </div>
+    <div class="abs" id="fn" style="left:86px;top:1780px;font:500 22px/1 Montserrat;letter-spacing:.08em;color:var(--mid)">*BRAND CLAIM, DYOU.CO</div>
+  </div>
+  <!-- S5 milk bath -->
+  <div class="shot" id="s5"><div class="bg" id="b5" style="background-image:url(assets/product/p4.jpg);background-position:40% 50%"></div><div class="tint"></div><div class="milk"></div><div class="shade"></div>
+    <div class="abs serif on-photo" id="t5" style="left:80px;top:1300px;font-size:150px">
+      <span class="line"><span class="w">calm, soft,</span></span>
+      <span class="line"><span class="w it">intensely</span></span>
+      <span class="line"><span class="w it">hydrated.</span></span>
+    </div>
+  </div>
+  <!-- S6 end -->
+  <div class="shot" id="s6"><!-- no bg: the violet comes from #drop underneath, so type rises over the bloom -->
+    <div class="abs serif" id="t6" style="left:0;width:1080px;top:640px;font-size:170px;color:var(--lav);text-align:center">
+      <span class="line"><span class="w">find your</span></span>
+      <span class="line"><span class="w it" style="color:#cbb8ff">inbalance.</span></span>
+    </div>
+    <div class="abs" id="mark" style="left:0;width:1080px;top:1300px;text-align:center;font:500 70px/1 Montserrat;color:var(--lav)">D’YOU</div>
+    <div class="abs kick" id="sub" style="left:0;width:1080px;top:1420px;text-align:center;color:#cbb8ff">soothing milky toner · dyou.co</div>
+  </div>
+  <div id="veil"></div>
+  <div id="drop"></div>
+</div>
+<div id="hud"></div>
+<script>
+const W = 1080, H = 1920, BAR = 2.0013, BEAT = BAR / 3, FR = 30;   // Piano Reflections: 3/4, ~90 BPM, bars every 2.0 s
+window.T = 16.5;
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const mix = (a, b, s) => a + (b - a) * s;
+function spring(t, k = 170, d = 26) {
+  if (t <= 0) return 0;
+  const w0 = Math.sqrt(k), z = d / (2 * w0);
+  if (z < 1) { const wd = w0 * Math.sqrt(1 - z * z); return 1 - Math.exp(-z * w0 * t) * (Math.cos(wd * t) + z * w0 / wd * Math.sin(wd * t)); }
+  return 1 - Math.exp(-w0 * t) * (1 + w0 * t);
+}
+const io = x => (x = clamp(x), x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const $ = id => document.getElementById(id);
+
+// shot table [id, start, end]; every cut sits on a bar line, joined by a 0.5 s milky dissolve
+const SHOTS = [["s0", 0, BAR], ["s1", BAR, 2 * BAR], ["s2", 2 * BAR, 3 * BAR], ["s3", 3 * BAR, 4 * BAR],
+               ["s4", 4 * BAR, 6 * BAR], ["s5", 6 * BAR, 7 * BAR], ["s6", 7 * BAR, 99]];
+const XF = 0.5;
+
+const CLIPS = { lav: 70, spray: 75 }, cache = {}, loads = [];
+const loaded = im => new Promise((ok, bad) => { if (im.complete && im.naturalWidth) ok(); else { im.onload = ok; im.onerror = () => bad(new Error("missing " + im.src)); } });
+for (const [c, n] of Object.entries(CLIPS)) {
+  cache[c] = [];
+  for (let i = 1; i <= n; i++) { const im = new Image(); im.src = `assets/frames/${c}/f_${String(i).padStart(4, "0")}.jpg`; cache[c].push(im); loads.push(loaded(im)); }
+}
+for (const f of ["p1.jpg", "p2.jpg", "p3.png", "p4.jpg"]) { const im = new Image(); im.src = "assets/product/" + f; loads.push(loaded(im)); }
+async function frame(img, clip, local) {
+  const src = cache[clip][clamp(Math.floor(local * FR), 0, CLIPS[clip] - 1)].src;
+  if (img.src !== src) { img.src = src; await loaded(img); }
+}
+function rise(el, t, k = 170, d = 26, extra = "") {
+  const s = spring(t, k, d);
+  el.style.visibility = t > 0 ? "inherit" : "hidden";  // a word waiting below its mask must not leak a fleck
+  el.style.transform = `translateY(${(1 - s) * 150}%) rotate(${(1 - s) * 4}deg) ${extra}`;
+}
+const words = id => $(id).querySelectorAll(".w");
+const kenburns = (el, l, dur, x = 0) => { el.style.transform = `scale(${1.12 - 0.1 * io(l / dur)}) translateX(${x * io(l / dur)}px)`; };
+
+window.seek = async (t) => {
+  const jobs = [];
+  // dissolve: incoming shot un-blurs from a milky veil; outgoing stays underneath
+  for (const [id, a, b] of SHOTS) {
+    const end = id === "s6";  // end card enters on the bloom, not a dissolve
+    const el = $(id), vis = t >= a - (end ? 0.3 : a ? XF / 2 : 0) && t < b + XF / 2;
+    el.style.visibility = vis ? "visible" : "hidden";
+    if (!vis) continue;
+    const s = a && !end ? io((t - (a - XF / 2)) / XF) : 1;
+    el.style.opacity = s; el.style.filter = s < 1 ? `blur(${(1 - s) * 22}px)` : "none";
+    el.style.zIndex = (SHOTS.findIndex(x => x[0] === id) + 1) * 10;
+  }
+  const near = Math.min(...SHOTS.slice(1).map(([, a]) => Math.abs(t - a)));
+  $("veil").style.opacity = 0.35 * Math.max(0, 1 - near / (XF / 2));
+
+  // S0 hook: first line readable on frame 0; the off-balance word lands tilted and keeps rocking gently
+  if (t < BAR + XF) {
+    jobs.push(frame($("v0"), "lav", t));
+    $("v0").style.transform = `scale(${1.08 - 0.06 * io(t / 2.4)})`;
+    const w = words("t0"), s0 = spring(t + 0.12, 320, 30);
+    w[0].style.transform = `translateY(${(1 - s0) * 40}%)`;
+    $("k0").style.opacity = 0.9 * spring(t - 0.05, 320, 30);
+    const tilt = -7 + 2.2 * Math.sin(t * 3.2) * Math.exp(-Math.max(0, t - BEAT) * 0.8);
+    rise(w[1], t - BEAT, 170, 26, `rotate(${tilt}deg)`);
+  }
+  // S1 spray clip
+  if (t >= BAR - XF && t < 2 * BAR + XF) {
+    const l = t - BAR; jobs.push(frame($("v1"), "spray", clamp(l, 0, 2.45)));
+    const w = words("t1"); rise(w[0], l - 0.15); rise(w[1], l - 0.15 - BEAT, 120, 24);
+  }
+  // S2 lifestyle still, slow push
+  if (t >= 2 * BAR - XF && t < 3 * BAR + XF) {
+    const l = t - 2 * BAR; kenburns($("b2"), l + XF, BAR + XF, -30);
+    const w = words("t2"); rise(w[0], l - 0.1); rise(w[1], l - 0.1 - BEAT, 120, 24);
+  }
+  // S3 product hero: the word that was tilted now sits level
+  if (t >= 3 * BAR - XF && t < 4 * BAR + XF) {
+    const l = t - 3 * BAR;
+    $("b3").style.transform = `translateY(${(1 - spring(l + 0.2, 120, 24)) * 80 - 14 * Math.sin(l * 1.4)}px) scale(${1.02 - 0.02 * io(l / BAR)})`;
+    rise(words("t3")[0], l - 0.05, 120, 24);
+    $("k3").style.opacity = spring(l - BEAT, 170, 26);
+  }
+  // S4 ingredients: one chip per beat, then the stat
+  if (t >= 4 * BAR - XF && t < 6 * BAR + XF) {
+    const l = t - 4 * BAR;
+    $("b4").style.transform = `scale(${1.04 - 0.04 * io(l / (2 * BAR))}) translateY(${-10 * Math.sin(l * 1.1)}px)`;
+    $("k4").style.opacity = spring(l - 0.1);
+    ["c0", "c1", "c2"].forEach((id, i) => {
+      const s = spring(l - (0.35 + i * BEAT), 170, 26);
+      $(id).style.opacity = s; $(id).style.transform = `translateX(${(1 - s) * -80}px)`;
+    });
+    const w = words("stat"); rise(w[0], l - BAR - BEAT, 120, 24); rise(w[1], l - BAR - 2 * BEAT, 170, 26); rise(w[2], l - BAR - 2 * BEAT - 0.08, 170, 26);
+    $("fn").style.opacity = 0.8 * spring(l - BAR - 2 * BEAT - 0.2);
+  }
+  // S5 milk bath still
+  if (t >= 6 * BAR - XF && t < 7 * BAR + XF) {
+    const l = t - 6 * BAR; kenburns($("b5"), l + XF, BAR + XF, 24);
+    const w = words("t5"); rise(w[0], l - 0.1); rise(w[1], l - 0.1 - BEAT, 120, 24); rise(w[2], l - 0.1 - 1.4 * BEAT, 120, 24);
+  }
+  // S6 end: a violet drop blooms from the centre, then type settles
+  const l6 = t - 7 * BAR;
+  // centre sits at 45% height, so the radius must reach the far (bottom) corners
+  const R = Math.hypot(W / 2, H * 0.55) * 1.05, r = l6 > -XF ? R * io((l6 + 0.3) / 0.55) : 0;
+  const dropOn = l6 > -0.3;  // stays as the end card's background once it fills the frame
+  Object.assign($("drop").style, { display: dropOn ? "block" : "none", left: W / 2 - r + "px", top: H * 0.45 - r + "px", width: 2 * r + "px", height: 2 * r + "px" });
+  if (l6 > -XF) {
+    // type rides in on the bloom itself: no empty violet beat
+    const w = words("t6"); rise(w[0], l6 + 0.08, 170, 26); rise(w[1], l6 + 0.08 - 0.75 * BEAT, 120, 24);
+    const m = spring(l6 - 2 * BEAT, 120, 24);
+    $("mark").style.opacity = m; $("mark").style.letterSpacing = `${mix(.7, .3, m)}em`;
+    $("mark").style.transform = `translateY(${-8 * clamp((l6 - 1.5) / 1.5)}px)`;
+    $("sub").style.opacity = spring(l6 - 3 * BEAT);
+  }
+  await Promise.all(jobs);
+  $("hud").textContent = t.toFixed(2) + "s  bar " + Math.floor(t / BAR);
+};
+
+Promise.all([document.fonts.ready, ...loads]).then(async () => { await window.seek(0); window.ready = true; });
+
+let playing = false, t0 = 0, cur = 0;
+const loop = async now => { if (!playing) return; cur = (now - t0) / 1000; if (cur >= window.T) { cur = window.T; playing = false; } await seek(cur); requestAnimationFrame(loop); };
+addEventListener("keydown", e => {
+  if (e.code === "Space") { playing = !playing; t0 = performance.now() - cur * 1000; requestAnimationFrame(loop); }
+  if (e.code === "ArrowRight") seek(cur = Math.min(window.T, cur + 1 / 30));
+  if (e.code === "ArrowLeft") seek(cur = Math.max(0, cur - 1 / 30));
+  if (e.code === "KeyR") { cur = 0; playing = true; t0 = performance.now(); requestAnimationFrame(loop); }
+});
+</script>
+</body></html>

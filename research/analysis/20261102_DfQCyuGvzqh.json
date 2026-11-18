@@ -1,0 +1,30 @@
+{
+ "file": "20261102_DfQCyuGvzqh.mp4",
+ "duration_s": 54.2,
+ "words": 209,
+ "wpm": 231.3,
+ "speech_ratio": 0.94,
+ "first_word_s": 0.11,
+ "visual_changes": 16,
+ "changes_per_10s": 2.95,
+ "avg_shot_s": 3.19,
+ "hook_3s": "So you might know me as this guy or this guy, but there's",
+ "changes": [
+  3.233,
+  4.033,
+  13.967,
+  15.6,
+  19.033,
+  20.533,
+  22.133,
+  25.5,
+  30.233,
+  33.167,
+  37.067,
+  38.867,
+  42.4,
+  45.567,
+  47.7,
+  49.933
+ ]
+}

@@ -1,0 +1,24 @@
+{
+ "file": "20261111_DflXG53DSjw.mp4",
+ "duration_s": 26.2,
+ "words": 48,
+ "wpm": 109.9,
+ "speech_ratio": 0.95,
+ "first_word_s": 0.0,
+ "visual_changes": 10,
+ "changes_per_10s": 3.81,
+ "avg_shot_s": 2.38,
+ "hook_3s": "code body clone row head stack double",
+ "changes": [
+  12.8,
+  13.3,
+  13.967,
+  16.333,
+  18.7,
+  19.967,
+  21.333,
+  21.833,
+  22.2,
+  22.533
+ ]
+}

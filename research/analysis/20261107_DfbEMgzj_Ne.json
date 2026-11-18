@@ -1,0 +1,24 @@
+{
+ "file": "20261107_DfbEMgzj_Ne.mp4",
+ "duration_s": 23.6,
+ "words": 49,
+ "wpm": 124.8,
+ "speech_ratio": 0.76,
+ "first_word_s": 0.0,
+ "visual_changes": 10,
+ "changes_per_10s": 4.25,
+ "avg_shot_s": 2.14,
+ "hook_3s": "predict keys, code body, blade slice,",
+ "changes": [
+  4.6,
+  5.7,
+  12.8,
+  14.933,
+  15.4,
+  15.9,
+  19.1,
+  22.267,
+  22.767,
+  23.033
+ ]
+}

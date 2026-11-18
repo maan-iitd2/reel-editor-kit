@@ -1,0 +1,11 @@
+<!doctype html><html><head><meta charset="utf-8"><style>html,body{margin:0;background:#000}#stage{position:relative;width:1080px;height:1920px;overflow:hidden}
+#stage img{position:absolute;inset:0;width:1080px;height:1920px}#w{position:absolute;left:0;right:0;top:420px;text-align:center;font:900 260px/1 Georgia;color:#F0ECE0}</style></head>
+<body><div id="stage"><img id="room"><div id="w">FIN</div><img id="sub"></div>
+<script src="../../effects/lib/core.js"></script>
+<script>
+const room = new K.Plate(document.getElementById('room'), '../shark/out/talk/room/%05d.png', 228);
+const sub = new K.Plate(document.getElementById('sub'), '../shark/out/talk/shark/%05d.png', 228);
+window.seek = async t => { await Promise.all([room.show(t), sub.show(t)]);
+  const v = K.vis(t, 0.5, 5, K.P.HEAVY); const w = document.getElementById('w'); w.style.opacity = K.clamp(v); w.style.transform = `translateY(${(1-K.clamp(v,0,1.2))*80}px)`; };
+window.seek(0).then(() => window.ready = true);
+</script></body></html>

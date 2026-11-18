@@ -1,0 +1,24 @@
+{
+ "file": "20261107_DfbDA_7iaaQ.mp4",
+ "duration_s": 26.1,
+ "words": 53,
+ "wpm": 121.8,
+ "speech_ratio": 0.72,
+ "first_word_s": 0.0,
+ "visual_changes": 10,
+ "changes_per_10s": 3.83,
+ "avg_shot_s": 2.37,
+ "hook_3s": "clone row, day dial, predict keys,",
+ "changes": [
+  3.3,
+  3.8,
+  4.367,
+  7.7,
+  8.667,
+  12.833,
+  13.3,
+  13.633,
+  15.167,
+  20.233
+ ]
+}

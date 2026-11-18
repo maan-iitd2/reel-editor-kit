@@ -1,0 +1,377 @@
+<!-- roughcut UI. One file, no build step, no dependencies. -->
+<meta charset="utf-8">
+<title>roughcut</title>
+<style>
+:root{--bg:#11131a;--panel:#181b24;--line:#272b38;--fg:#e6e8ef;--dim:#8b93a7;
+      --accent:#ffd23f;--in:#3ddc84;--out:#ff6b6b}
+*{box-sizing:border-box}
+body{margin:0;height:100vh;display:flex;flex-direction:column;background:var(--bg);
+     color:var(--fg);font:13px/1.45 ui-sans-serif,system-ui,Segoe UI,sans-serif}
+header{display:flex;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
+header b{font-size:15px;letter-spacing:.5px}
+button{background:#222634;color:var(--fg);border:1px solid var(--line);border-radius:6px;
+       padding:6px 12px;cursor:pointer;font:inherit}
+button:hover:not(:disabled){border-color:var(--accent)}
+button:disabled{opacity:.4;cursor:default}
+button.go{background:var(--accent);color:#11131a;border-color:var(--accent);font-weight:600}
+input,select{background:#0e1017;color:var(--fg);border:1px solid var(--line);
+             border-radius:6px;padding:6px 8px;font:inherit}
+main{flex:1;display:grid;grid-template-columns:250px 1fr 300px;min-height:0}
+section{overflow:auto;padding:10px;border-right:1px solid var(--line)}
+section:last-child{border:0}
+h3{margin:0 0 8px;font-size:11px;letter-spacing:.8px;text-transform:uppercase;color:var(--dim)}
+.clip{display:flex;gap:8px;padding:6px;border-radius:6px;cursor:pointer;margin-bottom:4px}
+.clip:hover{background:#1e2231}
+.clip.sel{background:#242a3d;outline:1px solid var(--accent)}
+.clip img{width:64px;height:36px;object-fit:cover;border-radius:3px;background:#000}
+.clip .n{font-weight:600}
+.clip .t{color:var(--dim);font-size:11px;max-height:32px;overflow:hidden}
+video{width:100%;background:#000;border-radius:8px;max-height:44vh}
+/* --- scrub bar --- */
+#strip{position:relative;height:72px;margin-top:10px;border:1px solid var(--line);
+       border-radius:6px;overflow:hidden;background:#000;cursor:pointer;user-select:none}
+/* Flex, not inline-block: at natural width 40 thumbs wrap onto six hidden rows
+   and the visible strip then shows only the first ~20% of the clip while the
+   click handler still maps full width to full duration. */
+#stripimgs{position:absolute;inset:0;display:flex}
+#stripimgs img{flex:1 1 0;min-width:0;height:100%;object-fit:cover;pointer-events:none}
+#play{position:absolute;top:0;bottom:0;width:2px;background:#fff;pointer-events:none}
+.mark{position:absolute;top:0;bottom:0;width:10px;cursor:ew-resize;z-index:3}
+.mark::before{content:'';position:absolute;top:0;bottom:0;left:4px;width:2px}
+#mIn::before{background:var(--in)}
+#mOut::before{background:var(--out)}
+#shade{position:absolute;top:0;bottom:0;background:rgba(255,210,63,.16);pointer-events:none}
+.cut{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.45);pointer-events:none}
+.row{display:flex;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.hit{display:flex;gap:8px;padding:4px;border-radius:6px;cursor:pointer;align-items:center}
+.hit:hover{background:#1e2231}
+.hit img{width:76px;height:43px;object-fit:cover;border-radius:3px}
+.sc{color:var(--accent);font-variant-numeric:tabular-nums}
+.shot{display:flex;gap:6px;align-items:center;padding:5px;border:1px solid var(--line);
+      border-radius:6px;margin-bottom:5px;font-size:12px}
+.shot .g{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.shot button{padding:2px 6px;font-size:11px}
+#log{height:110px;overflow:auto;background:#0b0d13;border-top:1px solid var(--line);
+     padding:6px 12px;font:11px/1.5 ui-monospace,Consolas,monospace;color:var(--dim);
+     white-space:pre-wrap}
+.muted{color:var(--dim)}
+</style>
+
+<header>
+  <b>roughcut</b>
+  <button id="bAnalyze">Analyze takes</button>
+  <button id="bBuild">Build</button>
+  <button id="bCaption">Caption</button>
+  <span id="busy" class="muted"></span>
+  <span style="flex:1"></span>
+  <select id="outSel" title="preview a rendered output"></select>
+</header>
+
+<main>
+  <section>
+    <h3>Takes</h3>
+    <div id="clips" class="muted">Click <b>Analyze takes</b> to begin.</div>
+    <h3 style="margin-top:14px">Search</h3>
+    <input id="q" placeholder="e.g. hand on the connector" style="width:100%">
+    <div id="hits"></div>
+  </section>
+
+  <section>
+    <video id="v" controls preload="metadata"></video>
+    <div id="strip">
+      <div id="stripimgs"></div>
+      <div id="shade"></div><div id="play"></div>
+      <div class="mark" id="mIn"></div><div class="mark" id="mOut"></div>
+    </div>
+    <div class="row">
+      <button id="setIn">Set IN at playhead</button>
+      <button id="setOut">Set OUT at playhead</button>
+      <span class="muted">in <b id="tIn">0.00</b>s &middot; out <b id="tOut">0.00</b>s
+        &middot; <b id="tLen">0.00</b>s</span>
+      <label>zoom <input id="zoom" type="number" value="1.00" step="0.02" min="1"
+             max="2" style="width:70px"></label>
+      <button class="go" id="add">Add shot &rarr;</button>
+    </div>
+    <div class="row muted" id="cutinfo"></div>
+  </section>
+
+  <section>
+    <h3>Direct</h3>
+    <div class="row">
+      <input id="intent" placeholder="describe the video you want" style="flex:1">
+    </div>
+    <div class="row">
+      <label>target <input id="target" type="number" value="30" min="5" max="90"
+             step="5" style="width:64px"></label>s
+      <label>music <select id="music"></select></label>
+      <span style="flex:1"></span>
+      <button class="go" id="bDirect" title="sends transcripts and frames to your configured provider — the only step that leaves this machine">Cut it for me</button>
+    </div>
+    <div class="row muted" id="who" style="font-size:11px"></div>
+    <h3 style="margin-top:14px">Shot plan</h3>
+    <div id="shots"></div>
+    <div class="row"><b id="total">0.0s</b> total
+      <span style="flex:1"></span>
+      <button class="go" id="save">Save plan</button></div>
+  </section>
+</main>
+<div id="log"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+let S = {clips: [], plan: "", music: [], busy: null, outputs: []};
+let cur = null;            // selected clip object
+let IN = 0, OUT = 0;
+let shots = [];            // {clip,start,end,zoom,enter,note}
+let lastPlanMtime = 0;
+
+const fmt = t => (Math.floor(t/60)+"").padStart(2,"0")+":"+(t%60).toFixed(1).padStart(4,"0");
+const parseT = s => s.split(":").reduce((a,p)=>a*60+parseFloat(p),0);
+
+// ---------- state ----------
+async function refresh(){
+  S = await (await fetch("/api/state")).json();
+  $("#busy").textContent = S.busy ? "● " + S.busy + "…" : "";
+  for (const b of ["bAnalyze","bBuild","bCaption","bDirect"]) $("#"+b).disabled = !!S.busy;
+  $("#log").textContent = (S.log||[]).join("\n");
+  $("#log").scrollTop = 1e9;
+  drawClips();
+  const m = $("#music"), keep = m.value;
+  m.innerHTML = "<option value=''>(none)</option>" +
+    S.music.map(x=>`<option ${x===keep?"selected":""}>${x}</option>`).join("");
+  const o = $("#outSel"), k2 = o.value;
+  o.innerHTML = "<option value=''>preview…</option>" +
+    S.outputs.map(x=>`<option ${x===k2?"selected":""}>${x}</option>`).join("");
+  // Load once. Re-loading whenever shots is empty overwrites an intent you
+  // are typing, and resurrects the saved plan a tick after you clear it.
+  // The exception is the director rewriting shotplan.md underneath us: a newer
+  // mtime is a deliberate external change, so adopt it.
+  if (!planLoaded && S.plan) loadPlan(S.plan);
+  else if (S.plan_mtime > lastPlanMtime && !S.busy) {
+    const keepIntent = $("#intent").value;
+    loadPlan(S.plan);
+    if (keepIntent && !$("#intent").value) $("#intent").value = keepIntent;
+  }
+  lastPlanMtime = S.plan_mtime || 0;
+  const who = S.director || "";
+  $("#who").textContent = who.startsWith("no key")
+    ? "no key in .env — add one line and restart to enable Direct"
+    : who;
+  $("#bDirect").disabled = !!S.busy || who.startsWith("no key");
+}
+
+function drawClips(){
+  const el = $("#clips");
+  if (!S.clips.length) return;
+  el.innerHTML = S.clips.map((c,i)=>`
+    <div class="clip ${cur&&cur.file===c.file?"sel":""}" data-i="${i}">
+      <img src="${c.strip&&c.strip.length?c.strip[Math.floor(c.strip.length/2)]:""}">
+      <div style="min-width:0">
+        <div class="n">${c.file}</div>
+        <div class="t">${c.duration.toFixed(1)}s${c.cuts&&c.cuts.length?" · "+c.cuts.length+" cuts":""}<br>${(c.text||"").slice(0,60)}</div>
+      </div></div>`).join("");
+  el.querySelectorAll(".clip").forEach(d =>
+    d.onclick = () => select(S.clips[+d.dataset.i]));
+}
+
+function select(c, seekTo){
+  cur = c;
+  $("#v").src = c.src;
+  IN = 0; OUT = c.duration;
+  if (seekTo != null) $("#v").addEventListener("loadedmetadata",
+    () => { $("#v").currentTime = seekTo; }, {once:true});
+  drawStrip(); drawClips();
+}
+
+// ---------- scrub bar ----------
+function drawStrip(){
+  const s = $("#strip"), box = $("#stripimgs");
+  box.innerHTML = "";
+  [...s.querySelectorAll(".cut")].forEach(n=>n.remove());
+  if (!cur) return;
+  (cur.strip||[]).forEach(u => { const i=new Image(); i.src=u; box.appendChild(i); });
+  (cur.cuts||[]).forEach(t => {
+    const d = document.createElement("div"); d.className="cut";
+    d.style.left = (t/cur.duration*100)+"%"; s.appendChild(d);
+  });
+  $("#cutinfo").textContent = (cur.cuts&&cur.cuts.length)
+    ? "detected cuts: " + cur.cuts.map(t=>t.toFixed(2)+"s").join(", ") : "no cuts detected";
+  paint();
+}
+
+function paint(){
+  if (!cur) return;
+  const pc = t => Math.max(0,Math.min(100, t/cur.duration*100));
+  $("#mIn").style.left  = "calc("+pc(IN)+"% - 5px)";
+  $("#mOut").style.left = "calc("+pc(OUT)+"% - 5px)";
+  $("#shade").style.left = pc(IN)+"%";
+  $("#shade").style.width = Math.max(0,pc(OUT)-pc(IN))+"%";
+  $("#tIn").textContent = IN.toFixed(2);
+  $("#tOut").textContent = OUT.toFixed(2);
+  $("#tLen").textContent = Math.max(0,OUT-IN).toFixed(2);
+}
+
+$("#strip").addEventListener("click", e => {
+  if (!cur || e.target.classList.contains("mark")) return;
+  const r = e.currentTarget.getBoundingClientRect();
+  $("#v").currentTime = (e.clientX-r.left)/r.width*cur.duration;
+});
+
+// Drag the IN/OUT handles. Pointer capture keeps the drag alive outside the bar.
+for (const [id, get, set] of [["#mIn",()=>IN,v=>IN=v], ["#mOut",()=>OUT,v=>OUT=v]]) {
+  const h = $(id);
+  h.addEventListener("pointerdown", e => {
+    e.preventDefault(); h.setPointerCapture(e.pointerId);
+    const bar = $("#strip").getBoundingClientRect();
+    const move = ev => {
+      if (!cur) return;
+      let t = (ev.clientX-bar.left)/bar.width*cur.duration;
+      t = Math.max(0, Math.min(cur.duration, t));
+      // Never let the handles cross; a zero or negative window is unbuildable.
+      if (id==="#mIn")  t = Math.min(t, OUT-0.05);
+      else              t = Math.max(t, IN+0.05);
+      set(t); paint(); $("#v").currentTime = t;
+    };
+    const up = ev => { h.releasePointerCapture(ev.pointerId);
+      h.removeEventListener("pointermove",move); h.removeEventListener("pointerup",up); };
+    h.addEventListener("pointermove",move); h.addEventListener("pointerup",up);
+  });
+}
+
+$("#v").addEventListener("timeupdate", () => {
+  if (!cur) return;
+  $("#play").style.left = ($("#v").currentTime/cur.duration*100)+"%";
+});
+$("#setIn").onclick  = () => { IN  = Math.min($("#v").currentTime, OUT-0.05); paint(); };
+$("#setOut").onclick = () => { OUT = Math.max($("#v").currentTime, IN+0.05); paint(); };
+
+// ---------- search ----------
+let qt;
+$("#q").addEventListener("input", e => {
+  clearTimeout(qt);
+  qt = setTimeout(async () => {
+    const q = e.target.value.trim();
+    if (!q) { $("#hits").innerHTML=""; return; }
+    $("#hits").innerHTML = "<div class='muted'>searching…</div>";
+    const r = await (await fetch("/api/search?q="+encodeURIComponent(q))).json();
+    if (r.error) { $("#hits").innerHTML = `<div class='muted'>${r.error}</div>`; return; }
+    $("#hits").innerHTML = r.hits.map(h=>`
+      <div class="hit" data-f="${h.file}" data-t="${h.t}">
+        <img src="${h.url}"><div><span class="sc">${h.score.toFixed(3)}</span><br>
+        <span class="muted">${h.file} @ ${h.t}s</span></div></div>`).join("");
+    $("#hits").querySelectorAll(".hit").forEach(d => d.onclick = () => {
+      const c = S.clips.find(x=>x.file===d.dataset.f);
+      if (c) select(c, parseFloat(d.dataset.t));
+    });
+  }, 350);
+});
+
+// ---------- shot plan ----------
+function drawShots(){
+  $("#shots").innerHTML = shots.map((s,i)=>`
+    <div class="shot">
+      <span class="g">${i+1}. ${s.clip} ${s.start.toFixed(2)}–${s.end.toFixed(2)} z${s.zoom}${s.enter&&s.enter!=="cut"?" "+s.enter:""}</span>
+      <button data-u="${i}">↑</button><button data-d="${i}">↓</button>
+      <button data-x="${i}">✕</button></div>`).join("");
+  $("#shots").querySelectorAll("button").forEach(b => b.onclick = () => {
+    const i = +(b.dataset.u ?? b.dataset.d ?? b.dataset.x);
+    if (b.dataset.x != null) shots.splice(i,1);
+    else if (b.dataset.u != null && i>0) shots.splice(i-1,0,shots.splice(i,1)[0]);
+    else if (b.dataset.d != null && i<shots.length-1) shots.splice(i+1,0,shots.splice(i,1)[0]);
+    drawShots();
+  });
+  $("#total").textContent = shots.reduce((a,s)=>a+s.end-s.start,0).toFixed(1)+"s";
+}
+
+$("#add").onclick = () => {
+  if (!cur || OUT-IN <= 0) return;
+  shots.push({clip:cur.file, start:IN, end:OUT,
+              zoom:parseFloat($("#zoom").value)||1, enter:"cut", note:""});
+  drawShots();
+};
+
+// Everything in the plan the UI does not edit. Preserved verbatim so opening a
+// Claude-authored plan and clicking Build cannot silently destroy its
+// transitions or its reasoning — this is the one artifact a human approves.
+let extras = {why:"", rejected:"", gain:"", ratio:""};
+let planLoaded = false;
+
+function planText(){
+  const L = ["# Shot plan",
+             "intent: " + ($("#intent").value||""),
+             "target: " + shots.reduce((a,s)=>a+s.end-s.start,0).toFixed(0) + "s",
+             "music: " + $("#music").value];
+  if (extras.gain)  L.push("music_gain_db: " + extras.gain);
+  if (extras.ratio) L.push("duck_ratio: " + extras.ratio);
+  L.push("", "## Shots");
+  shots.forEach((s,i) => L.push(
+    `${i+1}. ${s.clip} ${fmt(s.start)} ${fmt(s.end)} zoom=${s.zoom} `
+    + `enter=${s.enter||"cut"}` + (s.note ? `  # ${s.note}` : "")));
+  L.push("", "## Why", extras.why || "Assembled in the roughcut UI.",
+         "", "## Rejected", extras.rejected || "");
+  return L.join("\n");
+}
+
+function loadPlan(txt){
+  shots = [];
+  const why = [], rej = [];
+  let sec = "";
+  for (const raw of txt.split("\n")) {
+    const line = raw.trim(), low = line.toLowerCase();
+    if (low.startsWith("## ")) { sec = low.slice(3).trim().split(/\s+/)[0]; continue; }
+    if (sec === "why")      { why.push(raw); continue; }
+    if (sec === "rejected") { rej.push(raw); continue; }
+    if (low.startsWith("intent:")) $("#intent").value = line.slice(7).trim();
+    if (low.startsWith("music_gain_db:")) extras.gain = line.slice(14).trim();
+    if (low.startsWith("duck_ratio:")) extras.ratio = line.slice(11).trim();
+    if (low.startsWith("music:")) {
+      const m = line.slice(6).trim();
+      if (m) $("#music").value = m;
+    }
+    if (sec !== "shots") continue;
+    const m = line.match(/^(\d+)\.\s+(\S+)\s+(\S+)\s+(\S+)\s*(.*)$/);
+    if (!m) continue;
+    const rest = m[5];
+    const kv = Object.fromEntries([...rest.matchAll(/(\w+)=(\S+)/g)].map(x=>[x[1],x[2]]));
+    shots.push({clip:m[2], start:parseT(m[3]), end:parseT(m[4]),
+                zoom:parseFloat(kv.zoom||1), enter:kv.enter||"cut",
+                note:rest.replace(/(\w+)=(\S+)/g,"").replace(/^[\s#]+/,"").trim()});
+  }
+  extras.why = why.join("\n").trim();
+  extras.rejected = rej.join("\n").trim();
+  planLoaded = true;
+  drawShots();
+}
+
+$("#save").onclick = async () => {
+  await fetch("/api/plan",{method:"POST",headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({text:planText()})});
+  refresh();
+};
+
+// ---------- jobs ----------
+const post = p => fetch(p,{method:"POST",headers:{"Content-Type":"application/json"},
+                          body:"{}"}).then(refresh);
+$("#bAnalyze").onclick = () => post("/api/analyze");
+$("#bDirect").onclick = async () => {
+  const intent = $("#intent").value.trim();
+  if (!intent) { $("#intent").focus(); return; }
+  const r = await (await fetch("/api/direct", {method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({intent, target: +$("#target").value || 30,
+                          music: $("#music").value})})).json();
+  if (r.error) $("#log").textContent += "\n" + r.error;
+  // The director rewrites shotplan.md; let the mtime poll pick it up.
+  planLoaded = true;
+  refresh();
+};
+$("#bBuild").onclick   = () => $("#save").onclick()
+  .then(()=>post("/api/build"))
+  .catch(e => { $("#log").textContent += "\nsave failed, build skipped: " + e; });
+$("#bCaption").onclick = () => post("/api/caption");
+$("#outSel").onchange = e => { if (e.target.value) {
+  cur = null; $("#v").src = "/file/"+e.target.value; $("#v").play(); } };
+
+refresh();
+setInterval(refresh, 1500);
+</script>

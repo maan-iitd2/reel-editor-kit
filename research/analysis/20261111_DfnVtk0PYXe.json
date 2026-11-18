@@ -1,0 +1,25 @@
+{
+ "file": "20261111_DfnVtk0PYXe.mp4",
+ "duration_s": 61.6,
+ "words": 269,
+ "wpm": 261.9,
+ "speech_ratio": 0.98,
+ "first_word_s": 0.0,
+ "visual_changes": 11,
+ "changes_per_10s": 1.79,
+ "avg_shot_s": 5.14,
+ "hook_3s": "if ai edits your videos and your videos look like everybody else's",
+ "changes": [
+  6.4,
+  11.067,
+  13.167,
+  14.0,
+  16.533,
+  21.333,
+  22.267,
+  36.633,
+  46.667,
+  55.633,
+  57.833
+ ]
+}

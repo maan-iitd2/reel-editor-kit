@@ -1,0 +1,24 @@
+{
+ "file": "20261030_DfIK-QussLT.mp4",
+ "duration_s": 64.8,
+ "words": 310,
+ "wpm": 287.0,
+ "speech_ratio": 0.91,
+ "first_word_s": 0.0,
+ "visual_changes": 10,
+ "changes_per_10s": 1.54,
+ "avg_shot_s": 5.89,
+ "hook_3s": "There are a couple major problems with this. I didn't edit a single",
+ "changes": [
+  6.867,
+  10.067,
+  11.2,
+  14.467,
+  16.8,
+  19.333,
+  22.667,
+  42.4,
+  57.133,
+  60.4
+ ]
+}

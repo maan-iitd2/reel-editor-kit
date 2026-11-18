@@ -1,0 +1,29 @@
+{
+ "file": "20261101_DfNtDgtPuGj.mp4",
+ "duration_s": 48.6,
+ "words": 197,
+ "wpm": 243.1,
+ "speech_ratio": 0.88,
+ "first_word_s": 0.14,
+ "visual_changes": 15,
+ "changes_per_10s": 3.09,
+ "avg_shot_s": 3.04,
+ "hook_3s": "Ugh, this guy again. I didn't edit a single",
+ "changes": [
+  4.367,
+  5.633,
+  8.133,
+  10.733,
+  14.033,
+  15.2,
+  16.7,
+  18.2,
+  23.267,
+  26.733,
+  30.633,
+  36.067,
+  37.133,
+  43.233,
+  45.7
+ ]
+}

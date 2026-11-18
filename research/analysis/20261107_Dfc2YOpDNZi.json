@@ -1,0 +1,16 @@
+{
+ "file": "20261107_Dfc2YOpDNZi.mp4",
+ "duration_s": 3059.9,
+ "words": 10252,
+ "wpm": 201.0,
+ "speech_ratio": 0.9,
+ "first_word_s": 19.57,
+ "visual_changes": 2,
+ "changes_per_10s": 0.01,
+ "avg_shot_s": 1019.97,
+ "hook_3s": "",
+ "changes": [
+  1065.609,
+  1070.062
+ ]
+}

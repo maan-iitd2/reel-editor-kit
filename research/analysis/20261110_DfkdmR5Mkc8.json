@@ -1,0 +1,19 @@
+{
+ "file": "20261110_DfkdmR5Mkc8.mp4",
+ "duration_s": 48.5,
+ "words": 210,
+ "wpm": 259.7,
+ "speech_ratio": 0.95,
+ "first_word_s": 0.0,
+ "visual_changes": 5,
+ "changes_per_10s": 1.03,
+ "avg_shot_s": 8.09,
+ "hook_3s": "You can go from raw video to multiple edits to post it on trial",
+ "changes": [
+  0.767,
+  5.4,
+  7.2,
+  19.4,
+  20.8
+ ]
+}

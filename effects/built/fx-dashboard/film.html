@@ -1,0 +1,59 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>FX dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700&family=JetBrains+Mono:wght@500&display=block" rel="stylesheet">
+<style>
+  /* Colours sampled from justyn.ai reels (research/dissection.md): #163227 panel, #F0F4E9 cream, #9AA27C olive label */
+  :root{--panel:#163227;--cream:#F0F4E9;--done:#E7F9F1;--todo:#8FA399;--num:#778E84;--label:#9AA27C;--gold:#BFAB6D}
+  html,body{margin:0;background:#111}
+  #stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:radial-gradient(120% 80% at 40% 40%,#3a3a36,#141413)}
+  #panel{position:absolute;right:42px;top:170px;width:318px;padding:22px 0 18px;border-radius:16px;
+    background:rgba(22,50,39,.94);border:1.5px solid rgba(240,244,233,.14);box-shadow:0 18px 50px rgba(0,0,0,.35)}
+  #hd{display:flex;justify-content:space-between;padding:0 22px 16px;font:500 17px/1 'JetBrains Mono';letter-spacing:.16em;color:var(--label)}
+  #count{color:#C5DACF;letter-spacing:.04em}
+  #list{position:relative}
+  .it{position:relative;z-index:1;display:flex;align-items:baseline;gap:14px;height:36px;padding:0 22px;font:600 24px/36px Inter;letter-spacing:-.01em;white-space:nowrap}
+  .it b{font:500 14px/36px 'JetBrains Mono';font-weight:500;width:22px;color:var(--num)}
+  #pill{position:absolute;left:10px;right:10px;height:34px;top:1px;border-radius:9px;background:#FDFDFD;z-index:0}
+  #ft{margin:12px 22px 0;padding-top:16px;border-top:1.5px solid rgba(240,244,233,.16);font:700 26px/1 Inter;color:var(--cream)}
+</style></head><body>
+<div id="stage"><div id="panel"><div id="hd"><span>IN THIS VIDEO</span><span id="count"></span></div>
+<div id="list"><div id="pill"></div></div><div id="ft"></div></div></div>
+<script>
+// ---- config: edit per video. `at` = second the effect starts; null number = CTA row ("+" marker, not counted)
+const FX = {
+  more: 40,
+  items: [
+    {name:"Magazine cover", at:0.6}, {name:"Knockout captions", at:1.4}, {name:"Live markup", at:2.2},
+    {name:"Film look", at:3.0}, {name:"Comment drop", at:3.8, cta:true}, {name:"Jiggle delete", at:4.6},
+    {name:"Screenplay page", at:5.4}, {name:"Grid collapse", at:6.2}, {name:"Serif stamp", at:7.0},
+  ],
+};
+const ROW = 36;
+
+// closed-form spring step response (motion-design skill): k stiffness, d damping; 0 -> 1
+function step(t,k,d){if(t<=0)return 0;const w=Math.sqrt(k),z=d/(2*w);if(z>=1)return 1-(1+w*t)*Math.exp(-w*t);
+  const wd=w*Math.sqrt(1-z*z);return 1-Math.exp(-z*w*t)*(Math.cos(wd*t)+z*w/wd*Math.sin(wd*t));}
+// a value with many targets = sum of one spring per change
+function springTo(t,cues,k,d){let v=cues.length?cues[0].v:0;for(let i=1;i<cues.length;i++)v+=(cues[i].v-cues[i-1].v)*step(t-cues[i].t,k,d);return v;}
+
+const list=document.getElementById('list'), pill=document.getElementById('pill');
+const counted=FX.items.filter(x=>!x.cta).length;
+const rows=FX.items.map((x,i)=>{const el=document.createElement('div');el.className='it';
+  const n=FX.items.slice(0,i+1).filter(y=>!y.cta).length;
+  el.innerHTML=`<b>${x.cta?'+':String(n).padStart(2,'0')}</b><span>${x.name}</span>`;list.appendChild(el);return el;});
+document.getElementById('ft').textContent=`+ ${FX.more} more effects`;
+const pillCues=FX.items.map((x,i)=>({t:x.at,v:i*ROW}));
+
+window.seek=async t=>{
+  const s=step(t,170,26);                                   // panel slides in from the right
+  document.getElementById('panel').style.transform=`translateX(${(1-s)*380}px)`;
+  let cur=-1;FX.items.forEach((x,i)=>{if(t>=x.at)cur=i;});
+  pill.style.opacity=cur<0?0:Math.min(1,step(t-FX.items[0].at,320,30)*1.4);
+  pill.style.transform=`translateY(${springTo(t,pillCues,320,30)}px)`;   // snappy UI spring between rows
+  rows.forEach((el,i)=>{el.style.color=i===cur?'#000':(i<cur?'var(--done)':'var(--todo)');
+    el.querySelector('b').style.color=i===cur?'#000':'var(--num)';});
+  const n=FX.items.slice(0,cur+1).filter(y=>!y.cta).length;
+  document.getElementById('count').textContent=`${String(Math.max(n,0)).padStart(2,'0')} / ${String(counted).padStart(2,'0')}`;
+};
+document.fonts.ready.then(()=>{window.seek(0);window.ready=true;});
+</script></body></html>

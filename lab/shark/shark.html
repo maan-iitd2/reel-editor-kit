@@ -1,0 +1,181 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Shark rig</title>
+<style>html,body{margin:0;background:transparent}#c{display:block}</style>
+<script type="importmap">{"imports":{"three":"./vendor/three.module.min.js"}}</script>
+</head><body><canvas id="c"></canvas>
+<script type="module">
+// Shark avatar rig: an upright shark in a black puffer jacket (no logo), walking on two feet.
+// Driven only by window.seek(t). Config: ?cfg=<file.json> (see README). Layers: ?layer=shark|room|both
+import * as THREE from 'three';
+import { RoomEnvironment } from './vendor/RoomEnvironment.js';
+
+const Q = new URLSearchParams(location.search);
+const LAYER = Q.get('layer') || 'both';
+const CFG = await (await fetch(Q.get('cfg') || 'demo.json')).json();
+const [W, H] = CFG.size || [1080, 1920];
+const FPS = CFG.fps || 30;
+
+// ---------- deterministic helpers ----------
+function step(t,k,d){if(t<=0)return 0;const w=Math.sqrt(k),z=d/(2*w);if(z>=1)return 1-(1+w*t)*Math.exp(-w*t);
+  const wd=w*Math.sqrt(1-z*z);return 1-Math.exp(-z*w*t)*(Math.cos(wd*t)+z*w/wd*Math.sin(wd*t));}
+// keys [[t,v],...] -> value at time t; mode 'spring' (sum of springs per change) or 'lin'
+function keyed(keys, t, def, mode='spring', k=170, d=26){
+  if (!keys || !keys.length) return def;
+  if (mode === 'lin') { if (t <= keys[0][0]) return keys[0][1];
+    for (let i = 1; i < keys.length; i++) if (t < keys[i][0]) { const [a,va]=keys[i-1],[b,vb]=keys[i]; return va + (vb-va)*(t-a)/(b-a); }
+    return keys[keys.length-1][1]; }
+  let v = keys[0][1]; for (let i = 1; i < keys.length; i++) v += (keys[i][1]-keys[i-1][1]) * step(t-keys[i][0], k, d); return v; }
+const noise = (t, s) => Math.sin(t*1.13+s)*.5 + Math.sin(t*2.71+s*1.7)*.3 + Math.sin(t*5.3+s*2.3)*.2;
+const mouthAt = t => { const m = CFG.mouth || []; if (!m.length) return 0; const f = t*FPS, i = Math.floor(f), a = m[Math.min(i, m.length-1)] || 0, b = m[Math.min(i+1, m.length-1)] || 0; return a + (b-a)*(f-i); };
+
+// ---------- renderer ----------
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true, preserveDrawingBuffer:true});
+renderer.setPixelRatio(1); renderer.setSize(W, H);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
+renderer.setClearColor(0x000000, 0);
+const scene = new THREE.Scene();
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.55;
+const camera = new THREE.PerspectiveCamera(30, W/H, 0.05, 50);
+
+const key = new THREE.DirectionalLight(0xfff1dc, 2.4); key.position.set(-2.5, 4, 3.5); scene.add(key);
+const rim = new THREE.DirectionalLight(0xbcd6ff, 1.6); rim.position.set(2.8, 3, -3); scene.add(rim);
+scene.add(new THREE.HemisphereLight(0xf3efe6, 0x2c2a26, 0.5));
+
+// ---------- materials ----------
+const mat = (c, o={}) => new THREE.MeshPhysicalMaterial({color:c, roughness:.55, ...o});
+const M = {
+  skin: new THREE.MeshPhysicalMaterial({vertexColors:true, roughness:.42, clearcoat:.35, clearcoatRoughness:.4}),
+  fin: mat(0x5d7889, {roughness:.45, clearcoat:.3}),
+  puffer: mat(0x141414, {roughness:.32, clearcoat:.55, clearcoatRoughness:.35, sheen:.4, sheenColor:new THREE.Color(0x3a3a3a)}),
+  zip: mat(0x9a9a9a, {metalness:.9, roughness:.3}),
+  patch: mat(0xe9e7e1, {roughness:.6}),
+  pants: mat(0x26262a, {roughness:.85, sheen:.6, sheenColor:new THREE.Color(0x45454c)}),
+  shoe: mat(0xf2f0eb, {roughness:.6}), sole: mat(0x8e8a82, {roughness:.8}),
+  eye: mat(0x050505, {roughness:.08, clearcoat:1}), mouth: mat(0x4a1418, {roughness:.7}), tooth: mat(0xfbfaf4, {roughness:.35}),
+  gill: mat(0x2b3a44, {roughness:.7}),
+};
+const BELLY = new THREE.Color(0xeeefec), BACK = new THREE.Color(0x5f7b8d);
+function countershade(geo, lo, hi){ const p = geo.attributes.position, c = []; const col = new THREE.Color();
+  for (let i = 0; i < p.count; i++){ const y = p.getY(i); const k = THREE.MathUtils.smoothstep(y, lo, hi); col.copy(BELLY).lerp(BACK, k); c.push(col.r, col.g, col.b); }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(c, 3)); return geo; }
+// puffer tube: lathe with quilted baffles; prof = [[r,y],...] bottom->top
+function puffer(prof, baffle=.11, amp=.022, sz=.74){ const pts = [];
+  const y0 = prof[0][1], y1 = prof[prof.length-1][1];
+  for (let i = 0; i <= 90; i++){ const y = y0 + (y1-y0)*i/90; let j = 1; while (j < prof.length-1 && prof[j][1] < y) j++;
+    const [ra,ya] = prof[j-1], [rb,yb] = prof[j]; const r = ra + (rb-ra)*(y-ya)/Math.max(1e-6,yb-ya);
+    pts.push(new THREE.Vector2(r + amp*Math.pow(Math.abs(Math.sin(Math.PI*(y-y0)/baffle)), .6), y)); }
+  const g = new THREE.LatheGeometry(pts, 48); g.scale(1, 1, sz); return g; }
+const add = (parent, geo, m, x=0, y=0, z=0) => { const o = new THREE.Mesh(geo, m); o.position.set(x,y,z); parent.add(o); return o; };
+const pivot = (parent, x=0, y=0, z=0) => { const g = new THREE.Group(); g.position.set(x,y,z); parent.add(g); return g; };
+
+// ---------- the shark ----------
+const shark = new THREE.Group(); scene.add(shark);
+const hips = pivot(shark, 0, .95, 0);
+const torso = pivot(hips, 0, 0, 0);
+add(torso, puffer([[.40,0],[.45,.12],[.48,.3],[.48,.42],[.42,.52],[.30,.58]], .13, .011), M.puffer);   // jacket body
+add(torso, new THREE.CylinderGeometry(.27,.30,.2,40,1,true).scale(1,1,.8), M.puffer, 0, .62, 0).material.side = THREE.DoubleSide;  // stand collar
+add(torso, new THREE.BoxGeometry(.012,.58,.02), M.zip, 0, .3, .345);                                  // zipper
+add(torso, new THREE.SphereGeometry(.05,24,12,0,Math.PI*2,0,Math.PI/2).scale(1,.62,.25), M.patch, -.2, .42, .325).rotation.x = .25; // chest patch, no logo
+// dorsal fin out the back of the jacket
+const dfs = new THREE.Shape(); dfs.moveTo(0,0); dfs.quadraticCurveTo(.05,.32,-.22,.42); dfs.quadraticCurveTo(-.2,.18,-.34,0); dfs.lineTo(0,0);
+add(torso, new THREE.ExtrudeGeometry(dfs,{depth:.04,bevelEnabled:true,bevelSize:.012,bevelThickness:.012,bevelSegments:3}).rotateY(Math.PI/2).translate(-.02,0,0), M.fin, 0, .3, -.18);
+// head: lathe along +z (snout forward), flattened, hard countershade line, dorsal fin on top
+const head = pivot(torso, 0, .7, .02);
+const prof = [[-.45,.2],[-.32,.26],[-.12,.29],[.08,.27],[.24,.21],[.36,.13],[.45,.06],[.5,0]].map(([y,r]) => new THREE.Vector2(r, y));
+const skullG = new THREE.LatheGeometry(prof, 64).rotateX(Math.PI/2).scale(1, .8, 1);
+add(head, countershade(skullG, -.06, .0), M.skin);
+const dorsal = new THREE.Shape(); dorsal.moveTo(.18,0); dorsal.quadraticCurveTo(.1,.18,-.12,.36); dorsal.quadraticCurveTo(-.1,.16,-.26,0); dorsal.lineTo(.18,0);
+add(head, new THREE.ExtrudeGeometry(dorsal,{depth:.035,bevelEnabled:true,bevelSize:.012,bevelThickness:.012,bevelSegments:3}).rotateY(-Math.PI/2).translate(.0175,.2,-.1), M.fin);
+[-1,1].forEach(s => { add(head, new THREE.SphereGeometry(.034,24,16), M.eye, s*.205, .05, .2);
+  for (let g = 0; g < 3; g++) add(head, new THREE.CapsuleGeometry(.007,.1,4,8), M.gill, s*.262, -.01, -.06 - g*.06).rotation.z = s*.1; });
+// mouth: a dark grin on the lower front; it opens with the voice (lower teeth drop)
+const mouthG = pivot(head, 0, -.07, .33); mouthG.rotation.x = .4;  // sits where the snout's underside meets the front
+const cavity = add(mouthG, new THREE.SphereGeometry(1,40,20), M.mouth); cavity.scale.set(.125,.022,.075);
+const jaw = pivot(mouthG, 0, 0, 0);
+const toothRow = (parent, y, flip) => { for (let i = 0; i < 11; i++){ const a = -.95 + 1.9*i/10;
+  const tth = add(parent, new THREE.ConeGeometry(.013,.034,8), M.tooth, Math.sin(a)*.112, y, Math.cos(a)*.055 + .022); if (flip) tth.rotation.x = Math.PI; } };
+toothRow(mouthG, .012, true); toothRow(jaw, -.012, false);
+// arms (puffer sleeves + pectoral-fin hands)
+const arms = [-1,1].map(s => { const sh = pivot(torso, s*.44, .44, 0);
+  add(sh, puffer([[.12,-.42],[.135,-.2],[.13,0]], .14, .008, 1).translate(0,0,0), M.puffer);
+  const el = pivot(sh, 0, -.42, 0);
+  add(el, puffer([[.105,-.36],[.115,-.18],[.12,0]], .12, .007, 1), M.puffer);
+  const hand = add(el, new THREE.SphereGeometry(1,24,16).scale(.075,.13,.035).translate(0,-.46,0), M.fin);
+  hand.rotation.z = s*.12; return {sh, el, s}; });
+// legs (joggers + white sneakers)
+const legs = [-1,1].map(s => { const hp = pivot(hips, s*.17, -.02, 0);
+  add(hp, new THREE.CapsuleGeometry(.125,.32,6,16).translate(0,-.22,0), M.pants);
+  const kn = pivot(hp, 0, -.44, 0);
+  add(kn, new THREE.CapsuleGeometry(.105,.3,6,16).translate(0,-.2,0), M.pants);
+  const an = pivot(kn, 0, -.43, 0);
+  add(an, new THREE.CapsuleGeometry(.075,.2,6,16).rotateX(Math.PI/2).scale(1.25,1,1).translate(0,-.03,.07), M.shoe);
+  add(an, new THREE.BoxGeometry(.2,.035,.34).translate(0,-.1,.07), M.sole);
+  return {hp, kn, an, s}; });
+// tail out of the jacket hem
+const tail = pivot(hips, 0, .02, -.3);
+add(tail, countershade(new THREE.ConeGeometry(.13,.5,24).rotateX(-Math.PI/2.4).translate(0,-.1,-.22), -.3, .0), M.skin);
+const cf = new THREE.Shape(); cf.moveTo(0,0); cf.quadraticCurveTo(.12,.22,.05,.46); cf.quadraticCurveTo(.0,.2,-.06,.06); cf.quadraticCurveTo(.02,-.12,.14,-.28); cf.quadraticCurveTo(.06,-.1,0,0);
+add(tail, new THREE.ExtrudeGeometry(cf,{depth:.03,bevelEnabled:true,bevelSize:.01,bevelThickness:.01,bevelSegments:2}).rotateY(Math.PI/2).translate(0,-.2,-.46), M.fin);
+
+// ---------- room (separate layer) ----------
+const room = new THREE.Group(); scene.add(room);
+const RC = CFG.room || {wall:0x2e3d33, floor:0x5a4232, trim:0x34453a};
+const wallM = mat(RC.wall, {roughness:.9}), trimM = mat(RC.trim, {roughness:.8});
+add(room, new THREE.PlaneGeometry(14, 7), wallM, 0, 3.4, -2.2);
+add(room, new THREE.PlaneGeometry(14, 8).rotateX(-Math.PI/2), mat(RC.floor, {roughness:.75}), 0, 0, 1.5);
+for (let i = -3; i <= 3; i++){ const px = i*1.15;   // wainscot panels
+  [[px, .55, .9, .75], [px, 1.85, .9, 1.25]].forEach(([x,y,w,h]) => { const fr = new THREE.Group(); fr.position.set(x,y,-2.17); room.add(fr);
+    add(fr, new THREE.BoxGeometry(w,.035,.03), trimM, 0, h/2); add(fr, new THREE.BoxGeometry(w,.035,.03), trimM, 0, -h/2);
+    add(fr, new THREE.BoxGeometry(.035,h,.03), trimM, -w/2); add(fr, new THREE.BoxGeometry(.035,h,.03), trimM, w/2); }); }
+add(room, new THREE.BoxGeometry(14,.06,.05), trimM, 0, 1.08, -2.16);
+[-1.6, 1.6].forEach(x => { add(room, new THREE.CylinderGeometry(.09,.13,.2,24,1,true), mat(0xf2e3c4,{emissive:0xffc77a,emissiveIntensity:1.6,side:THREE.DoubleSide}), x, 2.45, -2.05);
+  const pl = new THREE.PointLight(0xffc27a, 3.5, 6, 1.6); pl.position.set(x, 2.4, -1.8); room.add(pl); });
+shark.visible = LAYER !== 'room'; room.visible = LAYER !== 'shark';
+if (LAYER === 'shark') room.children.filter(o => o.isLight).forEach(l => { l.visible = true; scene.add(l.clone()); });
+
+// ---------- camera presets ----------
+const CAMS = { wide:[0,1.1,7.2, 0,1.05,0, 30], medium:[0,1.6,4.7, 0,1.52,0, 30], close:[0,1.8,2.45, 0,1.74,0, 30],
+               low:[0,.6,3.2, 0,1.3,0, 34], top:[0,3.6,2.6, 0,1.2,0, 34] };
+
+// ---------- the frame ----------
+window.seek = async t => {
+  const K = CFG.keys || {};
+  // camera: each preset change springs (170/26); 'camShift' adds a horizontal reframe
+  const cams = (K.cam || [[0,'medium']]); const cv = [0,0,0,0,0,0,0];
+  for (let i = 0; i < 7; i++) { let v = CAMS[cams[0][1]][i];
+    for (let j = 1; j < cams.length; j++) v += (CAMS[cams[j][1]][i] - CAMS[cams[j-1][1]][i]) * step(t - cams[j][0], 170, 26); cv[i] = v; }
+  const shift = keyed(K.camShift, t, 0);
+  camera.position.set(cv[0] + shift, cv[1], cv[2]); camera.fov = cv[6]; camera.updateProjectionMatrix(); camera.lookAt(cv[3] + shift, cv[4], cv[5]);
+
+  // body placement: x/z travel is linear (constant walking speed), yaw springs
+  shark.position.set(keyed(K.x, t, 0, 'lin'), 0, keyed(K.z, t, 0, 'lin'));
+  shark.rotation.y = THREE.MathUtils.degToRad(keyed(K.yaw, t, 25, 'spring', 120, 22));
+  const walk = THREE.MathUtils.clamp(keyed(K.walk, t, 0, 'spring', 320, 30), 0, 1);
+  const ph = 2 * Math.PI * (CFG.stepsPerSec || 1.7) * t;
+  const mouth = mouthAt(t), gest = THREE.MathUtils.clamp(keyed(K.gesture, t, .6), 0, 1);
+
+  hips.position.y = .95 + walk * .035 * Math.abs(Math.cos(ph)) + (1-walk) * .006 * Math.sin(t*1.6);
+  hips.rotation.z = walk * .04 * Math.sin(ph);
+  torso.rotation.y = walk * .08 * Math.sin(ph) + .03 * noise(t, 1);
+  torso.rotation.x = -.04 + walk * .05 + .012 * Math.sin(t*1.6);
+  legs.forEach(({hp, kn, an, s}) => { const p = ph + (s > 0 ? Math.PI : 0);
+    hp.rotation.x = walk * .48 * Math.sin(p);
+    kn.rotation.x = walk * Math.max(0, .85 * Math.sin(p - 1.2)) ;
+    an.rotation.x = walk * .25 * Math.sin(p - .6); });
+  arms.forEach(({sh, el, s}) => { const p = ph + (s > 0 ? 0 : Math.PI);
+    const talkLift = (1-walk) * gest * (.25 + .5 * mouth + .15 * noise(t*1.3, s*3));
+    sh.rotation.x = walk * .42 * Math.sin(p) - talkLift * .5;
+    sh.rotation.z = s * (.16 + talkLift * .35);
+    el.rotation.x = -(.18 + walk * .25 + talkLift * 1.3); });
+  head.rotation.x = -.12 - mouth * .06 + .04 * noise(t*.8, 7);
+  head.rotation.y = .1 * noise(t*.6, 3);
+  head.rotation.z = .03 * noise(t*.7, 5);
+  jaw.position.y = -mouth * .05; cavity.scale.y = .022 + mouth * .05;
+  tail.rotation.y = (walk * .35 + .12) * Math.sin(ph * (walk > .1 ? 1 : .35) + 1);
+  renderer.render(scene, camera);
+};
+await window.seek(0); window.ready = true;
+</script></body></html>

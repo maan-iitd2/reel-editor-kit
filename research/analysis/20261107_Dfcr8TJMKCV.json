@@ -1,0 +1,24 @@
+{
+ "file": "20261107_Dfcr8TJMKCV.mp4",
+ "duration_s": 26.1,
+ "words": 53,
+ "wpm": 121.7,
+ "speech_ratio": 0.95,
+ "first_word_s": 0.0,
+ "visual_changes": 10,
+ "changes_per_10s": 3.83,
+ "avg_shot_s": 2.37,
+ "hook_3s": "live cursor clone row day dial predict",
+ "changes": [
+  7.7,
+  14.1,
+  15.067,
+  18.367,
+  18.867,
+  19.433,
+  20.3,
+  20.767,
+  21.1,
+  22.6
+ ]
+}

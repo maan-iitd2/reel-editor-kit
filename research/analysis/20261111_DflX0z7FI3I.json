@@ -1,0 +1,20 @@
+{
+ "file": "20261111_DflX0z7FI3I.mp4",
+ "duration_s": 27.0,
+ "words": 53,
+ "wpm": 117.8,
+ "speech_ratio": 0.78,
+ "first_word_s": 0.0,
+ "visual_changes": 6,
+ "changes_per_10s": 2.22,
+ "avg_shot_s": 3.86,
+ "hook_3s": "Dolly Zoom, Key Caps, Clone Row, Picture",
+ "changes": [
+  7.3,
+  14.333,
+  15.567,
+  21.533,
+  22.0,
+  22.4
+ ]
+}

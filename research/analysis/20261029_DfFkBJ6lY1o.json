@@ -1,0 +1,22 @@
+{
+ "file": "20261029_DfFkBJ6lY1o.mp4",
+ "duration_s": 56.8,
+ "words": 212,
+ "wpm": 224.1,
+ "speech_ratio": 0.91,
+ "first_word_s": 0.0,
+ "visual_changes": 8,
+ "changes_per_10s": 1.41,
+ "avg_shot_s": 6.31,
+ "hook_3s": "Last week, I released this, a masterclass showing you exactly how",
+ "changes": [
+  14.6,
+  15.133,
+  17.6,
+  21.733,
+  25.633,
+  31.667,
+  32.767,
+  49.2
+ ]
+}

@@ -1,0 +1,49 @@
+{
+ "title": "Shark test",
+ "shots": [
+  {
+   "id": "p01",
+   "t0": 0.0,
+   "t1": 1.6,
+   "label": "Talking head, medium",
+   "quote": "Yeah. I'm a shark, in a puffer jacket.",
+   "beat": "Medium shot in the green study. The shark turns ==three quarters to camera== and the jaw opens on every syllable.",
+   "sound": "room tone",
+   "score": "intro",
+   "still": "stills/p01.jpg"
+  },
+  {
+   "id": "p02",
+   "t0": 1.6,
+   "t1": 3.0,
+   "label": "Talking head, medium",
+   "quote": "And Claude edited this entire video.",
+   "beat": "Hold the medium. On ==Claude== a prompt bar drops in above the dorsal fin and types the instruction.",
+   "sound": "==key clicks==, soft tick",
+   "score": "the claim",
+   "still": "stills/p02.jpg"
+  },
+  {
+   "id": "p03",
+   "t0": 3.0,
+   "t1": 5.0,
+   "label": "Push to close",
+   "quote": "Not a single frame",
+   "beat": "Camera springs in to a close-up; the grin fills the lower third. ==No captions== over the mouth.",
+   "sound": "low boom",
+   "score": "punch in",
+   "still": "stills/p03.jpg"
+  },
+  {
+   "id": "p04",
+   "t0": 5.0,
+   "t1": 7.1,
+   "label": "Close, hold",
+   "quote": "by hand.",
+   "beat": "Hold on the close, a slow drift right; the end card types in on ==hand==.",
+   "sound": "whoosh out",
+   "score": "button",
+   "still": "stills/p04.jpg"
+  }
+ ]
+}
